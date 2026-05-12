@@ -23,7 +23,7 @@ impl MessageHandler<UserCreatedEventMessage> for UserCreatedHandler {
         let ten_millis = time::Duration::from_millis(1000);
         let now = time::Instant::now();
 
-        // thread::sleep(ten_millis);
+        thread::sleep(ten_millis);
 
         println!(   
             "In Falah's (NPM : 2406437432) Computer [129500004y], Message received: {:?}",

@@ -17,3 +17,13 @@ This string is a connection URL used by the publisher and subscriber to communic
 - `5672`: This is the specific port number that the RabbitMQ message broker listens on for incoming connections from programs.
 
 _(Note: While port `5672` is for the message broker itself, port `15672` is used separately for the web-based management dashboard.)_
+
+## Answer for Slow Subscriber Commit
+
+### Analysis of Queued Messages
+
+![Slow subscriber queue](screen-captures/slow-subscriber.png)
+
+The presence of 15 messages in the queue is a direct consequence of running the publisher program three times in quick succession while the subscriber was slowed down. According to the tutorial's logic, each individual run of the publisher sends exactly 5 events (for users Amir, Budi, Cica, Dira, and Emir) to the message broker. Because the subscriber's code was modified to include a 1-second delay (`thread::sleep`) for every message it handles, it can no longer process events at the same speed they are being produced.
+
+As the publisher finishes its three runs almost instantly, it "fires and forgets" a total of 15 events into the `user_created` channel. The RabbitMQ broker then stores these pending events in a queue, which acts as a back pressure point to prevent the slow subscriber from being overwhelmed or causing a system crash. This build-up demonstrates a core benefit of event-driven architecture: the system remains responsive because the producer does not have to wait for the consumer to finish, allowing the broker to buffer the workload. Consequently, the subscriber will slowly process each of the 15 messages one by one until the queue is eventually cleared.
